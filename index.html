@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monobooth | Online Photobooth</title>
+    <title>Monobooth | Pro Layout</title>
     <style>
         :root {
-            --primary: #d4a373; /* Gold accent */
+            --primary: #d4a373;
             --bg: #0f0f0f;
             --surface: #1a1a1a;
             --text: #ffffff;
             --glass: rgba(255, 255, 255, 0.05);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
 
         body {
             background-color: var(--bg);
@@ -22,187 +22,162 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 20px;
         }
 
-        /* Header & Logo */
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { 
-            font-size: 2.5rem; 
-            letter-spacing: 8px; 
-            text-transform: uppercase; 
-            font-weight: 800;
-        }
-        .header h1 span { font-weight: 200; color: var(--primary); }
-        .header p { opacity: 0.6; letter-spacing: 2px; font-size: 0.9rem; margin-top: 5px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-size: 2.2rem; letter-spacing: 6px; text-transform: uppercase; font-weight: 800; }
+        .header h1 span { color: var(--primary); font-weight: 200; }
 
-        /* Layout Main */
+        /* Mode Selector */
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: var(--surface);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--glass);
+        }
+
+        .mode-btn {
+            background: transparent;
+            border: none;
+            color: #777;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: 0.3s;
+        }
+
+        .mode-btn.active {
+            background: var(--primary);
+            color: #000;
+        }
+
         .main-wrapper {
             display: flex;
             flex-direction: row;
-            gap: 40px;
-            max-width: 1200px;
+            gap: 30px;
+            max-width: 1100px;
             width: 100%;
             justify-content: center;
             align-items: flex-start;
         }
 
-        /* Left: Camera Section */
         .camera-container {
             flex: 1;
             position: relative;
             background: var(--surface);
             padding: 15px;
-            border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            border-radius: 20px;
+            border: 1px solid var(--glass);
         }
 
         video {
             width: 100%;
             aspect-ratio: 4/3;
             object-fit: cover;
-            border-radius: 16px;
-            transform: scaleX(-1); /* Mirror */
+            border-radius: 12px;
+            transform: scaleX(-1);
             background: #000;
-            transition: filter 0.3s ease;
         }
 
-        /* Right: Result Section */
         .result-container {
             display: none;
             flex-direction: column;
             align-items: center;
-            animation: fadeIn 0.8s ease;
         }
 
         #strip-preview {
-            width: 280px; /* Lebar strip estetik */
+            max-width: 320px;
             background: white;
             padding: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
         }
 
-        /* UI Overlays */
         #countdown {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 120px;
+            font-size: 100px;
             font-weight: 900;
-            color: white;
-            text-shadow: 0 0 30px rgba(0,0,0,0.8);
             z-index: 10;
             pointer-events: none;
         }
 
         .status-badge {
             position: absolute;
-            top: 30px;
-            left: 30px;
+            top: 25px;
+            left: 25px;
             background: var(--primary);
             color: black;
-            padding: 6px 18px;
+            padding: 6px 14px;
             border-radius: 50px;
-            font-size: 0.75rem;
+            font-size: 11px;
             font-weight: bold;
-            display: none;
             z-index: 11;
+            display: none;
         }
 
-        /* Filter Controls */
-        .filter-group {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
+        .filter-group { display: flex; gap: 8px; margin-top: 15px; justify-content: center; flex-wrap: wrap; }
         .btn-filter {
             background: var(--glass);
             border: 1px solid rgba(255,255,255,0.1);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: 0.2s;
+            color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11px;
         }
+        .btn-filter.active { background: white; color: black; }
 
-        .btn-filter.active {
-            background: white;
-            color: black;
-            font-weight: bold;
-        }
-
-        /* Bottom Controls */
-        .action-area {
-            margin-top: 40px;
-            display: flex;
-            gap: 20px;
-        }
-
+        .action-area { margin-top: 30px; display: flex; gap: 15px; }
         .btn-main {
-            padding: 18px 45px;
-            border-radius: 50px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: 0.3s;
-            font-size: 0.9rem;
+            padding: 16px 40px; border-radius: 50px; border: none;
+            cursor: pointer; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
         }
-
         .btn-capture { background: var(--primary); color: #000; }
-        .btn-capture:hover { transform: scale(1.05); background: #e5b485; }
-
         .btn-retake { background: #333; color: white; display: none; }
         .btn-download { background: white; color: black; display: none; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Responsive */
-        @media (max-width: 900px) {
-            .main-wrapper { flex-direction: column; align-items: center; }
-            .camera-container { width: 100%; }
-        }
+        @media (max-width: 850px) { .main-wrapper { flex-direction: column; align-items: center; } }
     </style>
 </head>
 <body>
 
 <div class="header">
     <h1>MONO<span>BOOTH</span></h1>
-    <p>PURE &bull; TIMELESS &bull; MEMORY</p>
+</div>
+
+<div class="mode-selector">
+    <button class="mode-btn active" onclick="changeMode(4, this)">4 PHOTOS (STRIP)</button>
+    <button class="mode-btn" onclick="changeMode(8, this)">8 PHOTOS (GRID 2x4)</button>
 </div>
 
 <div class="main-wrapper">
     <div class="camera-container">
         <div id="countdown"></div>
-        <div class="status-badge" id="status">POSING 1 / 4</div>
+        <div class="status-badge" id="status">PHOTO 1</div>
         <video id="video" autoplay playsinline></video>
         
-        <div class="filter-group" id="filters">
-            <button class="btn-filter active" onclick="applyFilter('none', this)">RAW</button>
-            <button class="btn-filter" onclick="applyFilter('grayscale(100%) contrast(1.1)', this)">MONO</button>
-            <button class="btn-filter" onclick="applyFilter('sepia(0.6) contrast(1.1) brightness(0.9)', this)">NOSTALGIA</button>
-            <button class="btn-filter" onclick="applyFilter('brightness(1.2) contrast(1.1) saturate(1.3)', this)">VIBRANT</button>
-            <button class="btn-filter" onclick="applyFilter('blur(1px) brightness(1.1)', this)">SOFT</button>
+        <div class="filter-group">
+            <button class="btn-filter active" onclick="setFilter('none', this)">RAW</button>
+            <button class="btn-filter" onclick="setFilter('grayscale(100%) contrast(1.2)', this)">MONO</button>
+            <button class="btn-filter" onclick="setFilter('sepia(0.7) contrast(1.1)', this)">RETRO</button>
+            <button class="btn-filter" onclick="setFilter('brightness(1.2) saturate(1.1)', this)">GLOW</button>
         </div>
     </div>
 
     <div class="result-container" id="result-area">
-        <img id="strip-preview" alt="Monobooth Strip">
-        <canvas id="canvas-process" style="display:none;"></canvas>
+        <img id="strip-preview">
+        <canvas id="render-canvas" style="display:none;"></canvas>
     </div>
 </div>
 
 <div class="action-area">
     <button class="btn-main btn-capture" id="start-btn">Start Session</button>
     <button class="btn-main btn-retake" id="retake-btn">Retake</button>
-    <button class="btn-main btn-download" id="download-btn">Save Memory</button>
+    <button class="btn-main btn-download" id="download-btn">Download</button>
 </div>
 
 <script>
@@ -213,171 +188,129 @@
     const countdownEl = document.getElementById('countdown');
     const statusEl = document.getElementById('status');
     const resultArea = document.getElementById('result-area');
-    const stripPreview = document.getElementById('strip-preview');
-    const canvasProcess = document.getElementById('canvas-process');
-    const filterButtons = document.getElementById('filters');
+    const previewImg = document.getElementById('strip-preview');
+    const canvas = document.getElementById('render-canvas');
 
-    let capturedImages = [];
-    let activeFilter = 'none';
+    let photos = [];
+    let currentMode = 4;
+    let currentFilter = 'none';
 
-    // 1. Hidupkan Kamera
-    navigator.mediaDevices.getUserMedia({ 
-        video: { width: 800, height: 600 }, 
-        audio: false 
-    }).then(stream => {
-        video.srcObject = stream;
-    }).catch(err => {
-        alert("Kamera tidak dapat diakses. Pastikan izin kamera diberikan.");
-    });
+    navigator.mediaDevices.getUserMedia({ video: true }).then(s => video.srcObject = s);
 
-    // 2. Pilih Filter
-    function applyFilter(filter, btn) {
-        activeFilter = filter;
-        video.style.filter = filter;
+    function changeMode(val, btn) {
+        currentMode = val;
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function setFilter(f, btn) {
+        currentFilter = f;
+        video.style.filter = f;
         document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
     }
 
-    // 3. Logika Sesi Foto
     startBtn.addEventListener('click', async () => {
-        capturedImages = [];
+        photos = [];
         startBtn.disabled = true;
-        startBtn.style.opacity = "0.5";
-        filterButtons.style.pointerEvents = "none";
-        resultArea.style.display = "none";
-        retakeBtn.style.display = "none";
-        downloadBtn.style.display = "none";
+        resultArea.style.display = 'none';
+        retakeBtn.style.display = 'none';
+        downloadBtn.style.display = 'none';
 
-        for (let i = 1; i <= 4; i++) {
+        for (let i = 1; i <= currentMode; i++) {
             statusEl.style.display = 'block';
-            statusEl.innerText = `POSING ${i} / 4`;
-            
-            await handleCountdown(3);
-            takePhoto();
-            
-            // Flash Effect
-            document.body.style.backgroundColor = "white";
-            setTimeout(() => document.body.style.backgroundColor = "#0f0f0f", 100);
+            statusEl.innerText = `PHOTO ${i} / ${currentMode}`;
+            await runTimer(3);
+            takeSnap();
+            // Flash effect
+            document.body.style.background = "white";
+            setTimeout(() => document.body.style.background = "#0f0f0f", 50);
         }
 
-        renderFinalStrip();
-        finishSession();
+        renderOutput();
+        startBtn.disabled = false;
+        retakeBtn.style.display = 'inline-block';
+        downloadBtn.style.display = 'inline-block';
+        statusEl.style.display = 'none';
     });
 
-    function handleCountdown(sec) {
-        return new Promise(resolve => {
-            let count = sec;
-            countdownEl.innerText = count;
-            const timer = setInterval(() => {
-                count--;
-                if (count <= 0) {
-                    clearInterval(timer);
-                    countdownEl.innerText = "";
-                    resolve();
-                } else {
-                    countdownEl.innerText = count;
-                }
+    function runTimer(s) {
+        return new Promise(res => {
+            let c = s;
+            countdownEl.innerText = c;
+            let t = setInterval(() => {
+                c--;
+                if(c<=0){ clearInterval(t); countdownEl.innerText=""; res(); }
+                else countdownEl.innerText = c;
             }, 1000);
         });
     }
 
-    function takePhoto() {
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 800;
-        tempCanvas.height = 600;
-        const ctx = tempCanvas.getContext('2d');
-        
-        // Mirroring + Filter
-        ctx.filter = activeFilter;
-        ctx.translate(tempCanvas.width, 0);
-        ctx.scale(-1, 1);
+    function takeSnap() {
+        const c = document.createElement('canvas');
+        c.width = 800; c.height = 600;
+        const ctx = c.getContext('2d');
+        ctx.filter = currentFilter;
+        ctx.translate(c.width, 0); ctx.scale(-1, 1);
         ctx.drawImage(video, 0, 0, 800, 600);
-        
-        capturedImages.push(tempCanvas.toDataURL('image/jpeg', 0.9));
+        photos.push(c.toDataURL('image/jpeg', 0.9));
     }
 
-    // 4. Render ke Double Strip (Gaya Photobooth Asli)
-    function renderFinalStrip() {
-        const p = 30; // Padding
-        const imgW = 600;
-        const imgH = 450;
-        const stripW = imgW + (p * 2);
-        const stripH = (imgH * 4) + (p * 6) + 120; // Extra space for branding
+    function renderOutput() {
+        const p = 25; // Padding
+        const imgW = 500;
+        const imgH = 375;
+        const ctx = canvas.getContext('2d');
 
-        // Kita buat double strip (dua kolom identik)
-        canvasProcess.width = stripW * 2;
-        canvasProcess.height = stripH;
-        const ctx = canvasProcess.getContext('2d');
+        if (currentMode === 4) {
+            canvas.width = imgW + (p * 2);
+            canvas.height = (imgH * 4) + (p * 6) + 80;
+        } else {
+            // Mode 8: 2 Kolom, 4 Baris
+            canvas.width = (imgW * 2) + (p * 3);
+            canvas.height = (imgH * 4) + (p * 6) + 80;
+        }
 
         ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, canvasProcess.width, canvasProcess.height);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         let loaded = 0;
-        capturedImages.forEach((src, i) => {
+        photos.forEach((src, i) => {
             const img = new Image();
             img.src = src;
             img.onload = () => {
-                const yPos = p + (i * (imgH + p));
-                
-                // Gambar ke sisi kiri
-                ctx.drawImage(img, p, yPos, imgW, imgH);
-                // Gambar ke sisi kanan (Double print)
-                ctx.drawImage(img, p + stripW, yPos, imgW, imgH);
-                
+                let x, y;
+                if (currentMode === 4) {
+                    x = p;
+                    y = p + (i * (imgH + p));
+                } else {
+                    // Grid 2x4 logic
+                    const col = i % 2;
+                    const row = Math.floor(i / 2);
+                    x = p + (col * (imgW + p));
+                    y = p + (row * (imgH + p));
+                }
+                ctx.drawImage(img, x, y, imgW, imgH);
                 loaded++;
-                if (loaded === 4) {
-                    drawBranding(ctx, stripW, stripH);
-                    stripPreview.src = canvasProcess.toDataURL('image/png');
-                    resultArea.style.display = "flex";
+                if(loaded === currentMode) {
+                    ctx.fillStyle = "#222";
+                    ctx.font = "bold 30px Inter";
+                    ctx.textAlign = "center";
+                    ctx.fillText("M O N O B O O T H", canvas.width/2, canvas.height - 40);
+                    previewImg.src = canvas.toDataURL();
+                    resultArea.style.display = 'flex';
                 }
             };
         });
     }
 
-    function drawBranding(ctx, stripW, stripH) {
-        ctx.fillStyle = "#1a1a1a";
-        ctx.textAlign = "center";
-        
-        // Brand Kiri
-        ctx.font = "bold 35px Inter";
-        ctx.fillText("M O N O B O O T H", stripW / 2, stripH - 70);
-        ctx.font = "20px Inter";
-        ctx.fillText("PURE . TIMELESS . MEMORY", stripW / 2, stripH - 40);
-
-        // Brand Kanan
-        ctx.font = "bold 35px Inter";
-        ctx.fillText("M O N O B O O T H", (stripW / 2) + stripW, stripH - 70);
-        ctx.font = "20px Inter";
-        ctx.fillText("PURE . TIMELESS . MEMORY", (stripW / 2) + stripW, stripH - 40);
-        
-        // Garis potong tengah
-        ctx.setLineDash([10, 10]);
-        ctx.strokeStyle = "#ccc";
-        ctx.beginPath();
-        ctx.moveTo(stripW, 0);
-        ctx.lineTo(stripW, stripH);
-        ctx.stroke();
-    }
-
-    function finishSession() {
-        startBtn.disabled = false;
-        startBtn.style.opacity = "1";
-        filterButtons.style.pointerEvents = "auto";
-        statusEl.style.display = 'none';
-        retakeBtn.style.display = "inline-block";
-        downloadBtn.style.display = "inline-block";
-    }
-
-    // 5. Download & Retake
     retakeBtn.addEventListener('click', () => startBtn.click());
-    
     downloadBtn.addEventListener('click', () => {
-        const link = document.createElement('a');
-        link.download = `Monobooth-${Date.now()}.png`;
-        link.href = stripPreview.src;
-        link.click();
+        const a = document.createElement('a');
+        a.download = `Monobooth-${Date.now()}.png`;
+        a.href = previewImg.src;
+        a.click();
     });
 </script>
-
 </body>
 </html>
