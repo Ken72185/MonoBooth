@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Online Photobooth</title>
+    <style>
+        :root {
+            --primary: #d4a373; /* Warna Gold/Champagne untuk kesan Wedding */
+            --dark: #1a1a1a;
+            --light: #fefae0;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h1 {
+            font-weight: 300;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        /* Booth Container */
+        .booth-wrapper {
+            position: relative;
+            background: var(--glass);
+            padding: 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        /* Frame/Border Photobooth Overlay */
+        .booth-frame {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            right: 30px;
+            bottom: 30px;
+            border: 2px solid var(--primary);
+            pointer-events: none;
+            z-index: 5;
+            transition: all 0.3s ease;
+        }
+
+        .booth-frame::before {
+            content: "OUR SPECIAL DAY";
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--primary);
+        }
+
+        video, canvas, #photo-preview {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            display: block;
+            background: #000;
+            transform: scaleX(-1); /* Mirror effect */
+        }
+
+        #photo-preview {
+            display: none;
+        }
+
+        /* Countdown Overlay */
+        #countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 20px rgba(0,0,0,0.5);
+            z-index: 10;
+            display: none;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        .btn-capture { background: var(--primary); color: white; }
+        .btn-capture:hover { background: #bc8a5f; transform: translateY(-2px); }
+
+        .btn-retake { background: #e63946; color: white; display: none; }
+        .btn-download { background: #2a9d8f; color: white; display: none; }
+
+        /* Filter Options */
+        .filters {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            background: var(--glass);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+
+        .filter-btn.active {
+            background: white;
+            color: black;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 { font-size: 20px; }
+            .booth-frame { top: 15px; left: 15px; right: 15px; bottom: 15px; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Memory Booth</h1>
+
+    <div class="booth-wrapper">
+        <div id="countdown"></div>
+        <div class="booth-frame" id="frame-ui"></div>
+        
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas" style="display:none;"></canvas>
+        <img id="photo-preview" alt="Hasil Foto">
+    </div>
+
+    <div class="filters" id="filter-group">
+        <button class="filter-btn active" onclick="applyFilter('none', this)">Normal</button>
+        <button class="filter-btn" onclick="applyFilter('grayscale(100%)', this)">B&W</button>
+        <button class="filter-btn" onclick="applyFilter('sepia(100%) brightness(90%) contrast(110%)', this)">Vintage</button>
+        <button class="filter-btn" onclick="applyFilter('brightness(130%) contrast(110%)', this)">Bright</button>
+        <button class="filter-btn" onclick="applyFilter('blur(2px)', this)">Dreamy</button>
+    </div>
+
+    <div class="controls">
+        <button class="btn-capture" id="capture-btn">Ambil Foto</button>
+        <button class="btn-retake" id="retake-btn">Foto Ulang</button>
+        <a id="download-link" style="display:none;"></a>
+        <button class="btn-download" id="download-btn">Simpan Foto</button>
+    </div>
+</div>
+
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const preview = document.getElementById('photo-preview');
+    const captureBtn = document.getElementById('capture-btn');
+    const retakeBtn = document.getElementById('retake-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const countdownEl = document.getElementById('countdown');
+    const filterGroup = document.getElementById('filter-group');
+
+    let currentFilter = 'none';
+
+    // 1. Akses Kamera
+    async function initCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { width: 1280, height: 720 }, 
+                audio: false 
+            });
+            video.srcObject = stream;
+        } catch (err) {
+            alert("Error mengakses kamera: " + err.message);
+        }
+    }
+
+    // 2. Filter Logic
+    function applyFilter(filterStr, btn) {
+        currentFilter = filterStr;
+        video.style.filter = filterStr;
+        
+        // Update UI button
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    // 3. Take Photo with Countdown
+    captureBtn.addEventListener('click', () => {
+        let count = 3;
+        countdownEl.style.display = 'block';
+        countdownEl.innerText = count;
+
+        const timer = setInterval(() => {
+            count--;
+            if (count <= 0) {
+                clearInterval(timer);
+                countdownEl.style.display = 'none';
+                takeSnap();
+            } else {
+                countdownEl.innerText = count;
+            }
+        }, 1000);
+    });
+
+    function takeSnap() {
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        // Draw video to canvas (dengan filter & mirror)
+        context.save();
+        context.scale(-1, 1); // Flip horizontal untuk mirror
+        context.translate(-canvas.width, 0);
+        context.filter = currentFilter;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        context.restore();
+
+        // Tambahkan Frame ke hasil foto (opsional)
+        drawFrame(context, canvas.width, canvas.height);
+
+        // Show preview
+        const dataUrl = canvas.toDataURL('image/png');
+        preview.src = dataUrl;
+        preview.style.filter = 'none'; // Preview sudah punya filter dari canvas
+        
+        video.style.display = 'none';
+        preview.style.display = 'block';
+        
+        // Update Buttons
+        captureBtn.style.display = 'none';
+        filterGroup.style.display = 'none';
+        retakeBtn.style.display = 'inline-block';
+        downloadBtn.style.display = 'inline-block';
+    }
+
+    function drawFrame(ctx, width, height) {
+        const padding = 40;
+        ctx.strokeStyle = "#d4a373";
+        ctx.lineWidth = 10;
+        ctx.strokeRect(padding, padding, width - (padding*2), height - (padding*2));
+        
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "#d4a373";
+        ctx.textAlign = "center";
+        ctx.fillText("OUR SPECIAL DAY", width / 2, height - 60);
+    }
+
+    // 4. Retake Photo
+    retakeBtn.addEventListener('click', () => {
+        video.style.display = 'block';
+        preview.style.display = 'none';
+        captureBtn.style.display = 'inline-block';
+        filterGroup.style.display = 'flex';
+        retakeBtn.style.display = 'none';
+        downloadBtn.style.display = 'none';
+    });
+
+    // 5. Download Photo
+    downloadBtn.addEventListener('click', () => {
+        const date = new Date().toISOString().slice(0,10);
+        const link = document.createElement('a');
+        link.download = `photobooth-${date}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+
+    // Jalankan kamera saat load
+    initCamera();
+</script>
+
+</body>
+          </html>
