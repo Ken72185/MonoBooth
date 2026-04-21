@@ -3,71 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lumina Strip Photobooth</title>
+    <title>Monobooth | Online Photobooth</title>
     <style>
         :root {
-            --primary: #d4a373;
-            --dark: #121212;
-            --light: #ffffff;
-            --glass: rgba(255, 255, 255, 0.1);
+            --primary: #d4a373; /* Gold accent */
+            --bg: #0f0f0f;
+            --surface: #1a1a1a;
+            --text: #ffffff;
+            --glass: rgba(255, 255, 255, 0.05);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
 
         body {
-            background: #1a1a1a;
-            color: var(--light);
+            background-color: var(--bg);
+            color: var(--text);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 40px 20px;
         }
 
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { letter-spacing: 5px; text-transform: uppercase; font-weight: 300; }
+        /* Header & Logo */
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { 
+            font-size: 2.5rem; 
+            letter-spacing: 8px; 
+            text-transform: uppercase; 
+            font-weight: 800;
+        }
+        .header h1 span { font-weight: 200; color: var(--primary); }
+        .header p { opacity: 0.6; letter-spacing: 2px; font-size: 0.9rem; margin-top: 5px; }
 
-        /* Main Booth Area */
-        .main-container {
+        /* Layout Main */
+        .main-wrapper {
             display: flex;
             flex-direction: row;
-            gap: 30px;
-            max-width: 1000px;
+            gap: 40px;
+            max-width: 1200px;
             width: 100%;
             justify-content: center;
             align-items: flex-start;
         }
 
-        /* Camera Section */
-        .camera-section {
+        /* Left: Camera Section */
+        .camera-container {
             flex: 1;
             position: relative;
-            background: var(--glass);
-            padding: 10px;
-            border-radius: 15px;
+            background: var(--surface);
+            padding: 15px;
+            border-radius: 24px;
             border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
         }
 
         video {
             width: 100%;
-            border-radius: 10px;
-            transform: scaleX(-1);
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            border-radius: 16px;
+            transform: scaleX(-1); /* Mirror */
             background: #000;
+            transition: filter 0.3s ease;
         }
 
-        /* Result Section (The Strip) */
-        .result-section {
-            display: none; /* Muncul setelah foto selesai */
-            width: 250px;
-            background: white; /* Warna kertas foto klasik */
-            padding: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            animation: slideUp 0.5s ease;
+        /* Right: Result Section */
+        .result-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.8s ease;
         }
 
-        #final-strip-container img {
-            width: 100%;
-            display: block;
+        #strip-preview {
+            width: 280px; /* Lebar strip estetik */
+            background: white;
+            padding: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
         }
 
         /* UI Overlays */
@@ -76,84 +89,120 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 100px;
-            font-weight: 800;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            font-size: 120px;
+            font-weight: 900;
+            color: white;
+            text-shadow: 0 0 30px rgba(0,0,0,0.8);
             z-index: 10;
+            pointer-events: none;
         }
 
         .status-badge {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 30px;
+            left: 30px;
             background: var(--primary);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 12px;
+            color: black;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: bold;
             display: none;
+            z-index: 11;
         }
 
-        /* Controls */
-        .controls {
-            margin-top: 25px;
+        /* Filter Controls */
+        .filter-group {
             display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
             justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
 
-        button {
-            padding: 12px 30px;
-            border-radius: 5px;
+        .btn-filter {
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+
+        .btn-filter.active {
+            background: white;
+            color: black;
+            font-weight: bold;
+        }
+
+        /* Bottom Controls */
+        .action-area {
+            margin-top: 40px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn-main {
+            padding: 18px 45px;
+            border-radius: 50px;
             border: none;
             cursor: pointer;
             font-weight: bold;
-            transition: 0.3s;
             text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
+            font-size: 0.9rem;
         }
 
-        .btn-start { background: var(--primary); color: white; }
-        .btn-retake { background: #444; color: white; }
-        .btn-download { background: #2a9d8f; color: white; }
-        button:disabled { background: #666; cursor: not-allowed; }
+        .btn-capture { background: var(--primary); color: #000; }
+        .btn-capture:hover { transform: scale(1.05); background: #e5b485; }
 
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+        .btn-retake { background: #333; color: white; display: none; }
+        .btn-download { background: white; color: black; display: none; }
 
-        @media (max-width: 768px) {
-            .main-container { flex-direction: column; align-items: center; }
-            .result-section { width: 200px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-wrapper { flex-direction: column; align-items: center; }
+            .camera-container { width: 100%; }
         }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>Lumina Strip</h1>
-    <p>4 Poses, 1 Memory</p>
+    <h1>MONO<span>BOOTH</span></h1>
+    <p>PURE &bull; TIMELESS &bull; MEMORY</p>
 </div>
 
-<div class="main-container">
-    <div class="camera-section" id="cam-area">
+<div class="main-wrapper">
+    <div class="camera-container">
         <div id="countdown"></div>
-        <div class="status-badge" id="status">PHOTO 1 / 4</div>
+        <div class="status-badge" id="status">POSING 1 / 4</div>
         <video id="video" autoplay playsinline></video>
-    </div>
-
-    <div class="result-section" id="result-area">
-        <div id="final-strip-container">
-            <canvas id="main-canvas" style="display:none;"></canvas>
-            <img id="strip-preview" alt="Your Strip">
+        
+        <div class="filter-group" id="filters">
+            <button class="btn-filter active" onclick="applyFilter('none', this)">RAW</button>
+            <button class="btn-filter" onclick="applyFilter('grayscale(100%) contrast(1.1)', this)">MONO</button>
+            <button class="btn-filter" onclick="applyFilter('sepia(0.6) contrast(1.1) brightness(0.9)', this)">NOSTALGIA</button>
+            <button class="btn-filter" onclick="applyFilter('brightness(1.2) contrast(1.1) saturate(1.3)', this)">VIBRANT</button>
+            <button class="btn-filter" onclick="applyFilter('blur(1px) brightness(1.1)', this)">SOFT</button>
         </div>
     </div>
+
+    <div class="result-container" id="result-area">
+        <img id="strip-preview" alt="Monobooth Strip">
+        <canvas id="canvas-process" style="display:none;"></canvas>
+    </div>
 </div>
 
-<div class="controls">
-    <button class="btn-start" id="start-btn">Start Session</button>
-    <button class="btn-retake" id="retake-btn" style="display:none;">Retake All</button>
-    <button class="btn-download" id="download-btn" style="display:none;">Download Strip</button>
+<div class="action-area">
+    <button class="btn-main btn-capture" id="start-btn">Start Session</button>
+    <button class="btn-main btn-retake" id="retake-btn">Retake</button>
+    <button class="btn-main btn-download" id="download-btn">Save Memory</button>
 </div>
 
 <script>
@@ -165,49 +214,59 @@
     const statusEl = document.getElementById('status');
     const resultArea = document.getElementById('result-area');
     const stripPreview = document.getElementById('strip-preview');
-    const mainCanvas = document.getElementById('main-canvas');
+    const canvasProcess = document.getElementById('canvas-process');
+    const filterButtons = document.getElementById('filters');
 
     let capturedImages = [];
-    const maxPhotos = 4;
+    let activeFilter = 'none';
 
-    // Setup Kamera
-    async function init() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-            video.srcObject = stream;
-        } catch (e) {
-            alert("Kamera tidak diizinkan atau tidak ditemukan.");
-        }
+    // 1. Hidupkan Kamera
+    navigator.mediaDevices.getUserMedia({ 
+        video: { width: 800, height: 600 }, 
+        audio: false 
+    }).then(stream => {
+        video.srcObject = stream;
+    }).catch(err => {
+        alert("Kamera tidak dapat diakses. Pastikan izin kamera diberikan.");
+    });
+
+    // 2. Pilih Filter
+    function applyFilter(filter, btn) {
+        activeFilter = filter;
+        video.style.filter = filter;
+        document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
     }
 
-    // Fungsi Utama: Mulai Sesi Foto
+    // 3. Logika Sesi Foto
     startBtn.addEventListener('click', async () => {
         capturedImages = [];
         startBtn.disabled = true;
-        resultArea.style.display = 'none';
-        retakeBtn.style.display = 'none';
-        downloadBtn.style.display = 'none';
-        
-        for (let i = 1; i <= maxPhotos; i++) {
+        startBtn.style.opacity = "0.5";
+        filterButtons.style.pointerEvents = "none";
+        resultArea.style.display = "none";
+        retakeBtn.style.display = "none";
+        downloadBtn.style.display = "none";
+
+        for (let i = 1; i <= 4; i++) {
             statusEl.style.display = 'block';
-            statusEl.innerText = `PHOTO ${i} / ${maxPhotos}`;
+            statusEl.innerText = `POSING ${i} / 4`;
             
-            await runCountdown(3); // Hitung mundur 3 detik tiap foto
-            takeSnapshot();
+            await handleCountdown(3);
+            takePhoto();
             
-            // Efek Flash
+            // Flash Effect
             document.body.style.backgroundColor = "white";
-            setTimeout(() => document.body.style.backgroundColor = "#1a1a1a", 100);
+            setTimeout(() => document.body.style.backgroundColor = "#0f0f0f", 100);
         }
 
-        renderStrip();
+        renderFinalStrip();
         finishSession();
     });
 
-    // Countdown Promise
-    function runCountdown(seconds) {
-        return new Promise((resolve) => {
-            let count = seconds;
+    function handleCountdown(sec) {
+        return new Promise(resolve => {
+            let count = sec;
             countdownEl.innerText = count;
             const timer = setInterval(() => {
                 count--;
@@ -222,79 +281,102 @@
         });
     }
 
-    // Ambil Gambar
-    function takeSnapshot() {
+    function takePhoto() {
         const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 640;
-        tempCanvas.height = 480;
+        tempCanvas.width = 800;
+        tempCanvas.height = 600;
         const ctx = tempCanvas.getContext('2d');
         
-        // Mirroring & Drawing
+        // Mirroring + Filter
+        ctx.filter = activeFilter;
         ctx.translate(tempCanvas.width, 0);
         ctx.scale(-1, 1);
-        ctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+        ctx.drawImage(video, 0, 0, 800, 600);
         
-        capturedImages.push(tempCanvas.toDataURL('image/jpeg', 0.8));
+        capturedImages.push(tempCanvas.toDataURL('image/jpeg', 0.9));
     }
 
-    // Menggabungkan 4 foto menjadi 1 Strip
-    function renderStrip() {
-        const padding = 20;
-        const imgW = 400;
-        const imgH = 300;
-        const stripW = imgW + (padding * 2);
-        const stripH = (imgH * maxPhotos) + (padding * (maxPhotos + 2)) + 60; // Extra space for logo/text
+    // 4. Render ke Double Strip (Gaya Photobooth Asli)
+    function renderFinalStrip() {
+        const p = 30; // Padding
+        const imgW = 600;
+        const imgH = 450;
+        const stripW = imgW + (p * 2);
+        const stripH = (imgH * 4) + (p * 6) + 120; // Extra space for branding
 
-        mainCanvas.width = stripW;
-        mainCanvas.height = stripH;
-        const ctx = mainCanvas.getContext('2d');
+        // Kita buat double strip (dua kolom identik)
+        canvasProcess.width = stripW * 2;
+        canvasProcess.height = stripH;
+        const ctx = canvasProcess.getContext('2d');
 
-        // Background Kertas (Putih)
         ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, stripW, stripH);
+        ctx.fillRect(0, 0, canvasProcess.width, canvasProcess.height);
 
-        // Gambar setiap foto ke canvas
-        capturedImages.forEach((dataUrl, index) => {
+        let loaded = 0;
+        capturedImages.forEach((src, i) => {
             const img = new Image();
-            img.src = dataUrl;
+            img.src = src;
             img.onload = () => {
-                const yPos = padding + (index * (imgH + padding));
-                ctx.drawImage(img, padding, yPos, imgW, imgH);
+                const yPos = p + (i * (imgH + p));
                 
-                // Jika sudah foto terakhir, tampilkan preview
-                if (index === maxPhotos - 1) {
-                    // Tambah Teks Branding di bawah
-                    ctx.fillStyle = "#333";
-                    ctx.font = "italic 20px Inter";
-                    ctx.textAlign = "center";
-                    ctx.fillText("LUMINA STRIP", stripW/2, stripH - 40);
-                    ctx.font = "12px Inter";
-                    ctx.fillText(new Date().toLocaleDateString(), stripW/2, stripH - 20);
-
-                    stripPreview.src = mainCanvas.toDataURL('image/png');
-                    resultArea.style.display = 'block';
+                // Gambar ke sisi kiri
+                ctx.drawImage(img, p, yPos, imgW, imgH);
+                // Gambar ke sisi kanan (Double print)
+                ctx.drawImage(img, p + stripW, yPos, imgW, imgH);
+                
+                loaded++;
+                if (loaded === 4) {
+                    drawBranding(ctx, stripW, stripH);
+                    stripPreview.src = canvasProcess.toDataURL('image/png');
+                    resultArea.style.display = "flex";
                 }
             };
         });
     }
 
-    function finishSession() {
-        startBtn.disabled = false;
-        statusEl.style.display = 'none';
-        retakeBtn.style.display = 'inline-block';
-        downloadBtn.style.display = 'inline-block';
+    function drawBranding(ctx, stripW, stripH) {
+        ctx.fillStyle = "#1a1a1a";
+        ctx.textAlign = "center";
+        
+        // Brand Kiri
+        ctx.font = "bold 35px Inter";
+        ctx.fillText("M O N O B O O T H", stripW / 2, stripH - 70);
+        ctx.font = "20px Inter";
+        ctx.fillText("PURE . TIMELESS . MEMORY", stripW / 2, stripH - 40);
+
+        // Brand Kanan
+        ctx.font = "bold 35px Inter";
+        ctx.fillText("M O N O B O O T H", (stripW / 2) + stripW, stripH - 70);
+        ctx.font = "20px Inter";
+        ctx.fillText("PURE . TIMELESS . MEMORY", (stripW / 2) + stripW, stripH - 40);
+        
+        // Garis potong tengah
+        ctx.setLineDash([10, 10]);
+        ctx.strokeStyle = "#ccc";
+        ctx.beginPath();
+        ctx.moveTo(stripW, 0);
+        ctx.lineTo(stripW, stripH);
+        ctx.stroke();
     }
 
-    retakeBtn.addEventListener('click', () => startBtn.click());
+    function finishSession() {
+        startBtn.disabled = false;
+        startBtn.style.opacity = "1";
+        filterButtons.style.pointerEvents = "auto";
+        statusEl.style.display = 'none';
+        retakeBtn.style.display = "inline-block";
+        downloadBtn.style.display = "inline-block";
+    }
 
+    // 5. Download & Retake
+    retakeBtn.addEventListener('click', () => startBtn.click());
+    
     downloadBtn.addEventListener('click', () => {
         const link = document.createElement('a');
-        link.download = `LuminaStrip-${Date.now()}.png`;
+        link.download = `Monobooth-${Date.now()}.png`;
         link.href = stripPreview.src;
         link.click();
     });
-
-    init();
 </script>
 
 </body>
